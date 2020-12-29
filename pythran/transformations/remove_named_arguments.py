@@ -35,7 +35,7 @@ class RemoveNamedArguments(Transformation):
     def __init__(self):
         super(RemoveNamedArguments, self).__init__(Aliases)
 
-    def handle_keywords(self, func, node, offset=0):
+    def handle_keywords(self, func, node, offset=0, allkwargs=True):
         '''
         Gather keywords to positional argument information
 
@@ -67,8 +67,11 @@ class RemoveNamedArguments(Transformation):
 
         keywords_only = [v for _, v in sorted(keywords_only)]
 
-        extra_keyword_offset = max(keywords.keys()) if keywords else 0
-        node.args.extend([None] * (1 + extra_keyword_offset - len(node.args)))
+        if allkwargs:
+            extra_keyword_offset = len(func_argument_names) - 1 # -1 because of the 1+ below
+        else:
+            extra_keyword_offset = max(keywords.keys()) if keywords else 0
+        node.args.extend([None] * (1+ extra_keyword_offset - len(node.args)))
 
         replacements = {}
         for index, arg in enumerate(node.args):
